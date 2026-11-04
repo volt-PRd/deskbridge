@@ -1,17 +1,22 @@
 /**
  * Integration tests: the eleven DeskBridge tools driven through the REAL
- * dsh-tools execution pipeline (executeToolFixture: prepare → dispatch →
- * complete, including pre-execute policy and approval resolution) against
- * the fake CLI. Approval is exercised through a lightweight service under
- * the 'approval' service name — exactly the seam the pipeline looks up.
+ * dsh-tools execution pipeline (prepare → dispatch → complete, including
+ * pre-execute policy and approval resolution) against the fake CLI. Approval
+ * is exercised through a lightweight service under the 'approval' service
+ * name — exactly the seam the pipeline looks up.
+ *
+ * The suite runs against TWO dsh lines (>=0.2.1-rc.3): the pipeline entry is
+ * the dsh-tool-testkit fixture where that package exists (0.2.2 line) and
+ * falls back to ToolRuntime.execute — the same prepare → dispatch → complete
+ * path as a native executor — on the 0.2.1 line, where the testkit was not
+ * published. Both enter through the real registry code.
  *
  * @module tests/integration/tools.spec
  */
 
 import { describe, expect, it, afterEach } from 'vitest'
 import { Context, Service } from '@deepseek-ai/cordis'
-import { executeToolFixture } from '@deepseek-ai/dsh-tool-testkit'
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
+import { runToolFixture, loadNativeToolExecutor } from './pipeline.ts'
 import SubprocessLocal from '@deepseek-ai/dsh-subprocess-local'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
@@ -48,7 +53,7 @@ class ApprovalDouble extends Service {
 let callCounter = 0
 function call(ctx: Context, name: string, args: unknown, agent?: Agent, signal?: AbortSignal) {
   callCounter += 1
-  return executeToolFixture(ctx, {
+  return runToolFixture(ctx, {
     signal: signal ?? new AbortController().signal,
     callId: ToolCallId(`call-${callCounter}`),
     name,
@@ -75,7 +80,10 @@ async function setup(options: SetupOptions = {}): Promise<SetupResult> {
   const ctx = new Context()
   await ctx.plugin(SystemPrompt)
   await ctx.plugin(ToolRuntime)
-  await ctx.plugin(NativeToolExecutor)
+  // The native executor selects an executor on the 0.2.2 line; the 0.2.1
+  // registry executes directly and ships no executor package.
+  const nativeExecutor = await loadNativeToolExecutor()
+  if (nativeExecutor !== undefined) await ctx.plugin(nativeExecutor)
   // The subprocess seam the real plugin injects (dsh-base mounts this provider).
   await ctx.plugin(SubprocessLocal)
   if (options.approval !== undefined) {

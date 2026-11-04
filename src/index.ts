@@ -75,10 +75,20 @@ export async function apply(ctx: Context, config: Config): Promise<void> {
 
   // The exclusive computer-use slot: one desktop driver per DSH instance.
   // Escape hatch: claimComputerUse: false coexists with other providers.
+  // The registry is NOT in `inject`: on hosts that do not mount
+  // @deepseek-ai/dsh-computer-use at all, a hard dependency would leave this
+  // plugin permanently pending (cordis holds fibers until every injected
+  // service exists). `ctx.reflect.get` resolves the service when present and
+  // returns undefined otherwise — the claim degrades to a log line there.
   if (resolved.claimComputerUse) {
-    ctx.effect(function* () {
-      yield ctx.computerUse.register(ComputerUseProviderName('deskbridge'))
-    }, 'deskbridge.computerUse')
+    const computerUse = ctx.reflect.get('computerUse', false)
+    if (computerUse === undefined) {
+      logger.info('no computer-use registry on this host; skipping the exclusive slot claim')
+    } else {
+      ctx.effect(function* () {
+        yield computerUse.register(ComputerUseProviderName('deskbridge'))
+      }, 'deskbridge.computerUse')
+    }
   }
 
   registerPolicyGate(ctx, resolved)
@@ -112,5 +122,14 @@ export async function apply(ctx: Context, config: Config): Promise<void> {
 
   logger.info(`registered ${11} desktop tools (agent-desktop bridge)`)
 }
+
+// The loader keeps only the module's default export (unwrapExports: `exports.default
+// ?? exports`), so the metadata the registry reads — inject list and the Config
+// schema that fills defaults for partial row configs — must live on the plugin
+// object itself, like every upstream function-style plugin (e.g.
+// dsh-tool-executor-native attaches them to its `apply`). The named exports
+// above stay for direct-import consumers and type checking.
+apply.inject = inject
+apply.Config = Config
 
 export default apply

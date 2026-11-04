@@ -9,12 +9,9 @@
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { Context } from '@deepseek-ai/cordis'
+import type { Context } from '@deepseek-ai/cordis'
 import { spawn } from 'node:child_process'
 import type { SubprocessHandle, SubprocessSpawnSpec } from '@deepseek-ai/dsh-subprocess'
-import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
 import { resolveConfig, type Config, type ResolvedConfig } from '../../src/config.ts'
 import type { SpawnFn } from '../../src/adapter/cli.ts'
 

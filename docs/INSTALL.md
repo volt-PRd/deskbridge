@@ -4,7 +4,7 @@ DeskBridge is a DSH **bundle**: an npm package declaring `dsh.bundle.patch` that
 
 ## 1. Prerequisites
 
-- **DeepSeek Harness** (`dsh`) `>=0.2.2-alpha.2 <0.3.0` on PATH.
+- **DeepSeek Harness** (`dsh`) `>=0.2.1-rc.3 <0.2.2 || >=0.2.2-alpha.2 <0.3.0` on PATH (both the 0.2.1 and 0.2.2 lines are supported; the plugin was verified against `0.2.1-rc.3` and `0.2.2-alpha.2`).
 - **agent-desktop CLI** v1.0.x (envelope 2.6):
 
   ```sh
@@ -20,7 +20,7 @@ From a registry name (when published), a tarball, or a local checkout:
 
 ```sh
 dsh plugin --profile myprofile add dsh-deskbridge          # npm (not yet published)
-dsh plugin --profile myprofile add ./dsh-deskbridge-0.1.0.tgz
+dsh plugin --profile myprofile add ./dsh-deskbridge-0.1.1.tgz
 dsh plugin --profile myprofile add /path/to/deskbridge     # local checkout (built: lib/ present)
 dsh plugin --profile myprofile add github:<owner>/deskbridge#<sha>   # git install, see note
 ```

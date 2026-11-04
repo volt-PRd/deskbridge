@@ -6,11 +6,8 @@ export default defineConfig({
     testTimeout: 30_000,
     hookTimeout: 30_000,
     environment: 'node',
-    pool: 'forks',
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
-    },
+    // The plugin-bust suite boots full host compositions; a single process
+    // keeps shared service registrations isolated per file.
+    fileParallelism: false,
   },
 })

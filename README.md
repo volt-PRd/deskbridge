@@ -26,7 +26,7 @@ DeskBridge ("desktop bridge") lets a DeepSeek Harness (DSH) agent read and opera
 
 ## Requirements
 
-- DeepSeek Harness `>=0.2.2-alpha.2 <0.3.0` (installed through its official plugin mechanism)
+- DeepSeek Harness `>=0.2.1-rc.3 <0.2.2 || >=0.2.2-alpha.2 <0.3.0` — both the 0.2.1 and 0.2.2 lines (verified against 0.2.1-rc.3 and 0.2.2-alpha.2; installed through its official plugin mechanism)
 - [agent-desktop](https://github.com/vercel-labs/agent-desktop) v1.0.x CLI: `npm install -g agent-desktop` (macOS, Windows, or Linux with AT-SPI)
 - Node.js >= 24.9
 
@@ -45,10 +45,11 @@ then enable the row (it ships disabled) and set `enabled: true` in its config. C
 ```sh
 pnpm install
 pnpm run build      # tsc → lib/
-pnpm test           # vitest: 64 tests (unit + integration against a fake CLI)
+pnpm test           # vitest: 66 tests (unit + integration against a fake CLI)
+scripts/test-dsh-021.sh   # same suite against the dsh 0.2.1-rc.3 line
 pnpm typecheck
 ```
 
-Tests use a deterministic fake CLI (`tests/integration/fake-cli.mjs`) that emits the verified envelope contract, plus the **real** dsh-tools execution pipeline (`executeToolFixture`), so approval gating, policy denial, timeouts, and cancellation are exercised against the actual framework code.
+Tests use a deterministic fake CLI (`tests/integration/fake-cli.mjs`) that emits the verified envelope contract, plus the **real** dsh-tools execution pipeline (the tool-testkit fixture on the 0.2.2 line, the registry's own execute path on 0.2.1), so approval gating, policy denial, timeouts, and cancellation are exercised against the actual framework code. A loader-booted test (`plugin-bust.spec.ts`) applies the real entry point through `@deepseek-ai/cordis-plugin-loader` — the same path a DSH profile row takes — and CI repeats the whole suite against the dsh 0.2.1-rc.3 line (`scripts/test-dsh-021.sh`).
 
 License: MIT (this plugin). The agent-desktop CLI it invokes is a separate Apache-2.0 work.
