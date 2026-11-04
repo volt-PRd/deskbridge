@@ -1,0 +1,17 @@
+# DeskBridge bundle layer.
+#
+# The row is OFF by default: desktop interaction needs explicit consent
+# (README "Enable the plugin"). Turning it on can be done in the Web UI
+# (Plugins page), by removing `disabled: true` here through a later layer, or
+# by setting the plugin row's config `enabled: true` in the profile's
+# cordis.patch.yml. A later layer replaces the whole row, so re-enable with:
+#
+#   - id: deskbridge
+#     name: dsh-deskbridge
+#     config:
+#       enabled: true
+#
+- insert:
+    - id: deskbridge
+      name: dsh-deskbridge
+      disabled: true
